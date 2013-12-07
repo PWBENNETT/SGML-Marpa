@@ -1,14 +1,14 @@
-LTD ::= mdo 'LINKTYPE' ps LinkTypeName ps LinkSpecification ExtID WrappedLTDSubset ps mdc
+LTD ::= ( mdo ) 'LINKTYPE' ps LinkTypeName ps LinkSpecification ExtID WrappedLTDSubset ps ( mdc )
 LinkSpecification ::= SimpleLinkSpecification
                     | ImplicitLinkSpecification
                     | ExplicitLinkSpecification
 ExtID ::= ps ExternalIdentifier
         | Nil
-WrappedLTDSubset ::= ps dso LTDSubset dsc
+WrappedLTDSubset ::= ps ( dso ) LTDSubset ( dsc )
                    | Nil
 LinkTypeName ::= Name
-SimpleLinkSpecification ::= rni 'SIMPLE' ps rni 'IMPLIED'
-ImplicitLinkSpecification ::= SourceDocumentTypeName ps rni 'IMPLIED'
+SimpleLinkSpecification ::= ( rni ) 'SIMPLE' ps ( rni ) 'IMPLIED'
+ImplicitLinkSpecification ::= SourceDocumentTypeName ps ( rni ) 'IMPLIED'
 ExplicitLinkSpecification ::= SourceDocumentTypeName ps ResultDocumentTypeName
 SourceDocumentTypeName ::= DocumentTypeName
 ResultDocumentTypeName ::= DocumentTypeName
@@ -23,16 +23,16 @@ LinkSet ::= LinkAttributeSet
           | LinkSetDeclaration
 LinkAttributeSet ::= AttributeDefinitionListDeclaration
                    | EntitySet
-LinkSetDeclaration ::= mdo 'LINK' ps LinkSetName
-                                  ps LinkRule
-                                  ps
-                       mdc
-                     | mdo 'LINK' ps LinkSetName
-                                  ps LinkRule
-                       mdc
+LinkSetDeclaration ::= ( mdo ) 'LINK' ps LinkSetName
+                                      ps LinkRule
+                                      ps
+                       ( mdc )
+                     | ( mdo ) 'LINK' ps LinkSetName
+                                      ps LinkRule
+                       ( mdc )
 LinkSetUseDeclaration ::= DATACHAR LinkSetUseDeclaration
                         | DATACHAR
 LinkRule ::= SourceElementSpecification
            | ExplicitLinkRule
 LinkSetName ::= Name
-              | rni 'INITIAL'
+              | ( rni ) 'INITIAL'

@@ -1,4 +1,5 @@
-:default ::= action => [values]
+:default ::= action => ::array bless => ::lhs
+lexeme default = action => ::array bless => ::name
 :start ::= PotentiallySystemizedDocument
 CapacitySet ::= 'CAPACITY' ps CapacityGuts
 CapacityGuts ::= PublicCapacity
@@ -88,14 +89,13 @@ s ~ <s single>
         | Nothing
 <s star> ~ <s single>*
 <s plus> ~ <s single>+
-ts ::= ( s )
-     | Nil
+ts ::= s
      | ParameterEntityReference
-ps ::= ( ts )
-     | Nil
+ps ::= ts
      | CommentDeclaration
-ds ::= ( ps )
-     | Nil
+<ps opt> ::= ps
+           | Nil
+ds ::= ps
      | ProcessingInstruction
      | MarkedSectionDeclaration
 Nil ~ Nothing
@@ -211,8 +211,7 @@ DataCharacter ::= SGMLCharacterAtom
 Characters ::= Character+
 Character ::= SGMLCharacter
             | NONSGML
-SGMLCharacter ::= SGMLCharacterAtom SGMLCharacter
-                | SGMLCharacterAtom
+SGMLCharacter ::= SGMLCharacterAtom+
 SGMLCharacterAtom ::= MarkupCharacter
                     | DATACHAR
 MarkupCharacter ::= NameCharacter
@@ -239,12 +238,13 @@ ReplaceableParameterDataAtom ::= DataCharacter
                                | CharacterReference
                                | ParameterEntityReference
 NameTokenGroup ::= ( grpo ) ts NameTokens ts ( grpc )
-NameTokens ::= NameToken Connection NameTokens
-             | NameToken
+NameTokens ::= NameToken+ separator => Connection proper => 1
 NameGroup ::= ( grpo ) ts Names ts ( grpc )
-Names ::= Name Connection Names
-        | Name
+Names ::= Name+ separator => Connection proper => 1
 Connection ::= ts Connector
+Connector ::= and
+            | or
+            | seq
 AssociatedElementType ::= GenericIdentifier
                         | NameGroup
 ExternalIdentifier ::= 'SYSTEM'
@@ -260,12 +260,12 @@ MinimumLiteral ::= ( lit )  MinimumData ( lit )
                  | ( lita ) ( lita )
 MinimumData ::= MinimumDataCharacter+
 MinimumDataCharacter ~ RS
-                       | RE
-                       | SPACE
-                       | LCLetter
-                       | UCLetter
-                       | DIGIT
-                       | Special
+                     | RE
+                     | SPACE
+                     | LCLetter
+                     | UCLetter
+                     | DIGIT
+                     | Special
 FormalPublicIdentifier ::= OwnerIdentifier slashslash TextIdentifier
 OwnerIdentifier ::= ISOOwnerIdentifier
                   | RegisteredOwnerIdentifier
@@ -295,8 +295,7 @@ MarkedSectionDeclaration ::= ( MarkedSectionStart ) StatusKeywordSpecification (
 MarkedSectionStart ::= mdo dso
 MarkedSectionEnd ::= msc mdc
 MarkedSection ::= SGMLCharacter
-StatusKeywordSpecification ::= ps StatusKeyword ps
-                             | ps StatusKeyword
+StatusKeywordSpecification ::= ps StatusKeyword <ps opt>
 StatusKeyword ::= 'TEMP'
                 | 'CDATA'
                 | 'IGNORE'
@@ -307,7 +306,7 @@ EntityName ::= GeneralEntityName
              | ParameterEntityName
 GeneralEntityName ::= Name
                     | ( rni ) 'DEFAULT'
-ParameterEntityName ::= pero ps Name
+ParameterEntityName ::= ( pero ) ps Name
 EntityText ::= ParameterLiteral
              | DataText
              | BracketedText
@@ -327,15 +326,15 @@ EntityType ::= 'SUBDOC'
              | 'NDATA' ps NotationName DataAttributeSpecification
              | 'CDATA' ps NotationName DataAttributeSpecification
              | 'SDATA' ps NotationName DataAttributeSpecification
-DataTagGroup ::= ( dtgo ) ts GenericIdentifier ts seq ts DataTagPattern ts ( dtgc )
+DataTagGroup ::= ( dtgo ) ts GenericIdentifier ts seq ts DataTagPattern ts ( dtgc ) Nil
                | ( dtgo ) ts GenericIdentifier ts seq ts DataTagPattern ts ( dtgc ) OccurenceIndicator
 DataTagPattern ::= DataTagTemplate      OptionalDataTagPaddingTemplate
                  | DataTagTemplateGroup OptionalDataTagPaddingTemplate
 OptionalDataTagPaddingTemplate ::= ts seq DataTagPaddingTemplate
                                  | Nil
 DataTagTemplateGroup ::= ( grpo ) ts DataTagTemplateList ts ( grpc )
-DataTagTemplateList ::= DataTagTemplate ts or ts DataTagTemplateList
-                      | DataTagTemplate
+tsorts ::= ts or ts
+DataTagTemplateList ::= DataTagTemplate+ separator => tsorts proper => 1
 DataTagTemplate ::= ParameterLiteral
 DataTagPaddingTemplate ::= ParameterLiteral
 NotationIdentifier ::= ExternalIdentifier
