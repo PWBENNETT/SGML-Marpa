@@ -68,8 +68,8 @@ sub new {
         fragments => {
             Abstract => 'Abstract',
             Axiomatic => 'Axiomatic',
-            DefaultG0 => 'DefaultG0',
             DTD => 'DTD',
+            L0 => 'L0',
             LTD => 'LTD',
             Prolog => 'Prolog',
             SGMLDeclaration => 'SGMLDeclaration',
