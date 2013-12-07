@@ -21,6 +21,8 @@ push @INC, sub {
     my $grammar_name = $look_here . $filename;
     $grammar_name =~ s/\.pm$/.slif/;
 
+    return unless -f $grammar_name;
+
     my @prolog = (
         "package $package_name;\n",
         "use 5.018;\n",
