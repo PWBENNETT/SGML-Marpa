@@ -1,0 +1,11 @@
+Prolog ::= OPList DTD DTDOP LTDOP
+DTDOP ::= DTD DTDOP
+        | OtherProlog DTDOP
+        | Nil
+LTDOP ::= LTD LTDOP
+        | OtherProlog LTDOP
+        | Nil
+OPList ::= OtherProlog+ separator => s proper => 1
+OtherProlog ::= CommentDeclaration
+              | ProcessingInstruction
+              | s
