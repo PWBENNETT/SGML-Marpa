@@ -60,7 +60,7 @@ sub new {
     my $class = shift;
     $class = ref($class) || $class;
     my $class = shift;
-    my %args = eval { keys %{$_[0]} } ? %{%_[0]} : @_;
+    my %args = eval { keys %{$_[0]} } ? %{$_[0]} : @_;
     my $frags = delete($args{ fragments }) || { };
     my $system = delete($args{ system });
     my $prefix = delete($args{ prefix }) || [ ];
