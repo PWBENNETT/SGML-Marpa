@@ -3,33 +3,41 @@ package SGML::Marpa;
 use 5.018;
 use utf8;
 
+use IO::All;
 use Marpa::R2;
 
 push @INC, sub {
     my ($self, $filename) = @_;
 
-    my $package_name = $filename;
-    $package_name =~ s{/}{::}g;
-    $package_name =~ s/\.pm$//;
+    # TODO find the right pathsep instead of guessing
+    my $wanted = join('::', split m{(?:(?:\\)+|/)}, $filename);
+    $wanted =~ s/\.pm$//;
 
-    my $caller = caller;
-    $caller =~ s{::}{/}g;
-    $caller .= '.pm';
-
-    my $look_here = $INC{$caller};
-    $look_here =~ s{\.pm$}{/};
-    my $grammar_name = $look_here . $filename;
+    my (undef, $call_file) = caller;
+    my $ext = io($call_file)->ext;
+    my $directory = io($call_file)->absolute->canonpath();
+    $directory =~ s/\.$ext$//;
+    my $grammar_name = io->catfile($directory, $filename)->absolute->canonpath();
     $grammar_name =~ s/\.pm$/.slif/;
+
+    if (!-f $grammar_name) {
+        $directory = $INC{io->catfile(qw( SGML Marpa.pm ))->relative->canonpath()};
+        $directory =~ s/\.pm$//;
+        $grammar_name = io->catfile($directory, $filename)->absolute->canonpath();
+    }
 
     return unless -f $grammar_name;
 
     my @prolog = (
-        "package $package_name;\n",
+        "package $wanted;\n",
         "use 5.018;\n",
         "use utf8;\n",
         "sub get {\n",
         "return <<'MARPA';\n",
     );
+
+    my @lines = io($grammar_name)->slurp;
+    $lines[ -1 ] .= "\n" unless substr($lines[ -1 ], -1) eq "\n";
 
     my @epilog = (
         "MARPA\n",
@@ -37,21 +45,13 @@ push @INC, sub {
         "1;\n",
     );
 
+    my @rv = (@prolog, @lines, @epilog);
+
     return sub {
-        open my $ifh, '<', $grammar_name;
-        if (@prolog) {
-            $_ = shift @prolog;
+        if (@rv) {
+            $_ = shift @rv;
             return 1;
         }
-        elsif (defined(my $line = <$ifh>)) {
-            $_ = $line;
-            return 1;
-        }
-        elsif (@epilog) {
-            $_ = shift @epilog;
-            return 1;
-        }
-        close $ifh;
         return 0;
     };
 };
